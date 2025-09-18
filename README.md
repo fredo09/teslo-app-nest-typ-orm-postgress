@@ -10,13 +10,6 @@ Api hecho con nest usando el type ORM usando de base de datos Postgres.
 $ npm install
 ```
 
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-```
-
 Ademas de tener sus configuraciones necesarias sobre el archivo ```.env```
 
 # Imagen Docker Base de datos
@@ -26,6 +19,13 @@ Ya se tiene una configuración inicial sobre como levantar la imagen con el arch
 
 ```bash
 $ docker compose up -d
+```
+
+## Compile and run the project
+
+```bash
+# development
+$ npm run start
 ```
 
 ## Description FrameWork
