@@ -1,8 +1,10 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+
+//! Cada entity es una tabla en la bd
 
 @Entity()
 export class Product {
-	@PrimaryColumn('uuid')
+	@PrimaryGeneratedColumn('uuid')
 	id: string;
 
 	@Column('text', {
@@ -10,7 +12,7 @@ export class Product {
 	})
 	title: string;
 
-	@Column('numeric', {
+	@Column('float', {
 		default: 0
 	})
 	price: number;
