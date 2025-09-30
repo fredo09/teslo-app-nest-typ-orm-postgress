@@ -10,6 +10,16 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
 import { Product } from './entities/product.entity';
+
+/**
+ * Servicio de productos
+ * Maneja la lógica de negocio relacionada con los productos
+ * Utiliza el repositorio de productos para interactuar con la base de datos
+ * Proporciona métodos para crear, obtener, actualizar y eliminar productos
+ * Incorpora manejo de excepciones para errores comunes
+ * @author fredy_vazzqz
+ * @version 1.0.0
+ */
 @Injectable()
 export class ProductsService {
   private readonly logger = new Logger('ProductsService');
@@ -20,6 +30,11 @@ export class ProductsService {
     private readonly productsRepository: Repository<Product>,
   ) {}
 
+  /**
+   * Crea un nuevo producto
+   * @param createProductDto datos para crear un nuevo producto
+   * @returns 
+   */
   async create(createProductDto: CreateProductDto) {
     try {
       const savedProduct = this.productsRepository.create(createProductDto);
@@ -31,22 +46,46 @@ export class ProductsService {
     }
   }
 
+  /**
+   * Encontrar todos los productos
+   * @returns Una lista de todos los productos
+   */
   findAll() {
     return `This action returns all products`;
   }
 
+  /**
+   * Busca un producto por su ID
+   * @param id identificador del producto a buscar
+   * @returns 
+   */
   findOne(id: number) {
     return `This action returns a #${id} product`;
   }
 
+  /**
+   * Actualiza un producto por su ID
+   * @param id identificador del producto a actualizar
+   * @param updateProductDto datos a actualizar
+   * @returns 
+   */
   update(id: number, updateProductDto: UpdateProductDto) {
     return `This action updates a #${id} product`;
   }
 
+  /**
+   * Elimina un producto por su ID
+   * @param id identificador del producto a eliminar
+   * @returns 
+   */
   remove(id: number) {
     return `This action removes a #${id} product`;
   }
 
+  /**
+   * @description Maneja las excepciones lanzadas por la base de datos
+   * @param error 
+   */
   private _handleExceptions(error: any) {
     if (error.code === '23505') 
       throw new BadRequestException(error.detail);
