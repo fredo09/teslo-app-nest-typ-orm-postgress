@@ -1,6 +1,5 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-
 //! Cada entity es una tabla en la bd
+import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 /**
  * Entidad de producto
