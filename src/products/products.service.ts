@@ -5,11 +5,13 @@ import {
   InternalServerErrorException, 
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
 import { Product } from './entities/product.entity';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 /**
  * Servicio de productos
@@ -50,8 +52,13 @@ export class ProductsService {
    * Encontrar todos los productos
    * @returns Una lista de todos los productos
    */
-  findAll() {
-    return `This action returns all products`;
+  findAll(paginationDto: PaginationDto) {
+    const { limit = 10, offSet = 0 } = paginationDto;
+    return this.productsRepository.find({
+      take: limit,
+      skip: offSet
+      //TODO: relaciones
+    });
   }
 
   /**
@@ -59,8 +66,19 @@ export class ProductsService {
    * @param id identificador del producto a buscar
    * @returns 
    */
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(term: string) {
+    let product: Product | null;
+
+    if (isUUID(term)) {
+      product = await this.productsRepository.findOneBy({ id: term });
+    } else {
+      product = await this.productsRepository.findOneBy({ slug: term });
+    }
+
+    if (!product)
+      throw new BadRequestException(`Product with id ${term} not found`);
+
+    return product;
   }
 
   /**
@@ -69,7 +87,7 @@ export class ProductsService {
    * @param updateProductDto datos a actualizar
    * @returns 
    */
-  update(id: number, updateProductDto: UpdateProductDto) {
+  update(id: string, updateProductDto: UpdateProductDto) {
     return `This action updates a #${id} product`;
   }
 
@@ -78,8 +96,10 @@ export class ProductsService {
    * @param id identificador del producto a eliminar
    * @returns 
    */
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string) {
+    const findProduct = await this.findOne(id);
+    await this.productsRepository.remove(findProduct);
+    return `Product with id ${id} has been removed` ;
   }
 
   /**
