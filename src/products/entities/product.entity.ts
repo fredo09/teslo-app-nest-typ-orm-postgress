@@ -1,5 +1,5 @@
 //! Cada entity es una tabla en la bd
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 /**
  * Entidad de producto
@@ -56,6 +56,14 @@ export class Product {
 	checkSlugInsert() {
 		if(!this.slug) this.slug = this.title;
 
+		this.slug = this.slug
+		.toLowerCase()
+		.replaceAll(' ', '-')
+		.replaceAll("'", '');
+	}
+
+	@BeforeUpdate()
+	checkSlugUpdate() {		
 		this.slug = this.slug
 		.toLowerCase()
 		.replaceAll(' ', '-')

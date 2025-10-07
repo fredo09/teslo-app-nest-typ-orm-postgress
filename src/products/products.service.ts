@@ -2,7 +2,8 @@ import {
   Logger,
   Injectable, 
   BadRequestException, 
-  InternalServerErrorException, 
+  InternalServerErrorException,
+  NotFoundException, 
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
@@ -92,8 +93,24 @@ export class ProductsService {
    * @param updateProductDto datos a actualizar
    * @returns 
    */
-  update(id: string, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    try {
+      //! prepara para la actualizacion
+      const productUpdate = await this.productsRepository.preload({
+        id,
+        ...updateProductDto
+      });
+
+      if (!productUpdate)
+        throw new NotFoundException(`Product with id ${id} not found`);
+
+      //! realiza la actualizacion
+      const updatedProduct = await this.productsRepository.save(productUpdate);
+      return updatedProduct;
+
+    } catch (error) {
+      this._handleExceptions(error);
+    }
   }
 
   /**
