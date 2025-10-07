@@ -72,7 +72,12 @@ export class ProductsService {
     if (isUUID(term)) {
       product = await this.productsRepository.findOneBy({ id: term });
     } else {
-      product = await this.productsRepository.findOneBy({ slug: term });
+      // product = await this.productsRepository.findOneBy({ slug: term });
+      const queryBuilder = this.productsRepository.createQueryBuilder(); //* Creacion de un query builder
+      product = await queryBuilder.where('UPPER(title) =:title or slug =: slug', {
+        title: term.toUpperCase(),
+        slug: term.toLowerCase()
+      }).getOne();
     }
 
     if (!product)
