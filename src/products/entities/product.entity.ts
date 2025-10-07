@@ -50,6 +50,11 @@ export class Product {
 	gender: string;
 
 	//TODO: TAGS Y IMAGES
+	@Column('text', {
+		array: true,
+		default: []
+	})
+	tags: string[];
 
 	//* Usamos el before Insert y BeforeUpdate para hacer algo antes de insertar o actualizar
 	@BeforeInsert()
