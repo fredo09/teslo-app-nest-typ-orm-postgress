@@ -11,8 +11,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
-import { Product } from './entities/product.entity';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { ProductImage, Product } from './entities';
 
 /**
  * Servicio de productos
@@ -31,6 +31,9 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
+
+    @InjectRepository(ProductImage)
+    private readonly productImageRepository: Repository<ProductImage>,
   ) {}
 
   /**
@@ -38,12 +41,17 @@ export class ProductsService {
    * @param createProductDto datos para crear un nuevo producto
    * @returns 
    */
-  async create(createProductDto: CreateProductDto) {
+  async create({ images = [], ...productDetails }: CreateProductDto) {
     try {
-      const savedProduct = this.productsRepository.create(createProductDto);
+      const savedProduct = this.productsRepository.create({
+        ...productDetails,
+        images: images.map(image => this.productImageRepository.create({
+          url: image
+        }))
+      });
       await this.productsRepository.save(savedProduct);
 
-      return savedProduct;
+      return { ...savedProduct, images };
     } catch (error) {
       this._handleExceptions(error);
     }
@@ -93,12 +101,19 @@ export class ProductsService {
    * @param updateProductDto datos a actualizar
    * @returns 
    */
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(
+    id: string,
+    {
+      images = [],
+      ...updateProductDetail
+    }: UpdateProductDto
+  ) {
     try {
       //! prepara para la actualizacion
       const productUpdate = await this.productsRepository.preload({
         id,
-        ...updateProductDto
+        ...updateProductDetail,
+        images: []
       });
 
       if (!productUpdate)
