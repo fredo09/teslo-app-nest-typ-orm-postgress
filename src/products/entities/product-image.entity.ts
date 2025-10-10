@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne} from "typeorm";
+import { Product } from "./product.entity";
 
 /**
  * ProductImage entity representing an image associated with a product.	
@@ -17,4 +18,10 @@ export class ProductImage {
 
 	@Column('text')
 	url: string;
+
+	@ManyToOne(
+		() => Product,
+		(product) => product.images,
+	)
+	product: Product
 }

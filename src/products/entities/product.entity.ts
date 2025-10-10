@@ -1,5 +1,6 @@
 //! Cada entity es una tabla en la bd
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ProductImage } from "./product-image.entity";
 
 /**
  * Entidad de producto
@@ -55,6 +56,14 @@ export class Product {
 		default: []
 	})
 	tags: string[];
+
+	//! relacion de images con product
+	@OneToMany(
+		() => ProductImage,
+		(productImage) => productImage.product,
+		{ cascade: true } //cascade: true -> si se elimina un producto, se eliminan sus imagenes
+	)
+	images? : ProductImage;
 
 	//* Usamos el before Insert y BeforeUpdate para hacer algo antes de insertar o actualizar
 	@BeforeInsert()
