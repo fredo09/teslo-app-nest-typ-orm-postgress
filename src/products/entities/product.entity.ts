@@ -63,7 +63,7 @@ export class Product {
 		(productImage) => productImage.product,
 		{ cascade: true } //cascade: true -> si se elimina un producto, se eliminan sus imagenes
 	)
-	images? : ProductImage;
+	images? : ProductImage[];
 
 	//* Usamos el before Insert y BeforeUpdate para hacer algo antes de insertar o actualizar
 	@BeforeInsert()
