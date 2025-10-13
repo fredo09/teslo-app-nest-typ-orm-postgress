@@ -62,8 +62,7 @@ export class ProductsService {
    * Encontrar todos los productos
    * @returns Una lista de todos los productos
    */
-  findAll(paginationDto: PaginationDto) {
-    const { limit = 10, offSet = 0 } = paginationDto;
+  findAll({ limit = 10, offSet = 0 } : PaginationDto) {
     return this.productsRepository.find({
       take: limit,
       skip: offSet
