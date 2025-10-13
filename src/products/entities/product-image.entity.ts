@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne} from "typeorm";
+import { 
+	Column,
+	Entity,
+	PrimaryGeneratedColumn,
+	ManyToOne 
+} from "typeorm";
+
 import { Product } from "./product.entity";
 
 /**

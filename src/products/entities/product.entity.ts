@@ -1,5 +1,13 @@
 //! Cada entity es una tabla en la bd
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { 
+	BeforeInsert,
+	BeforeUpdate,
+	Column,
+	Entity,
+	OneToMany,
+	PrimaryGeneratedColumn
+} from "typeorm";
+
 import { ProductImage } from "./product-image.entity";
 
 /**
