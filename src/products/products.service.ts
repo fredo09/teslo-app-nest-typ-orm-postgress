@@ -62,12 +62,20 @@ export class ProductsService {
    * Encontrar todos los productos
    * @returns Una lista de todos los productos
    */
-  findAll({ limit = 10, offSet = 0 } : PaginationDto) {
-    return this.productsRepository.find({
+  async findAll({ limit = 10, offSet = 0 } : PaginationDto) {
+    const findProducts = await this.productsRepository.find({
       take: limit,
-      skip: offSet
+      skip: offSet,
       //TODO: relaciones
+      relations: {
+        images: true
+      }
     });
+
+    return findProducts.map(({ images, ...restProduct }) => ({
+      ...restProduct,
+      images: (images || [] ).map( img => img.url)
+    }))
   }
 
   /**
@@ -82,17 +90,31 @@ export class ProductsService {
       product = await this.productsRepository.findOneBy({ id: term });
     } else {
       // product = await this.productsRepository.findOneBy({ slug: term });
-      const queryBuilder = this.productsRepository.createQueryBuilder(); //* Creacion de un query builder
-      product = await queryBuilder.where('UPPER(title) =:title or slug =: slug', {
+      const queryBuilder = this.productsRepository.createQueryBuilder('prod'); //* Creacion de un query builder
+      product = await queryBuilder.where('UPPER(title)=:title or slug=:slug', {
         title: term.toUpperCase(),
         slug: term.toLowerCase()
-      }).getOne();
+      }).leftJoinAndSelect('prod.images', 'prodImages').getOne();
     }
 
     if (!product)
       throw new BadRequestException(`Product with id ${term} not found`);
 
     return product;
+  }
+
+  /**
+   * Busca un producto por su término de búsqueda y devuelve una versión simplificada
+   * del producto con solo las URLs de las imágenes.
+   * @param term termino de busqueda
+   * @returns {Object} objeto del producto con URLs de imágenes
+   */
+  async findOnePlainProduct(term: string) {
+    const { images = [], ...restProduct } = await this.findOne(term);
+    return {
+      ...restProduct,
+      images: images.map( img => img.url)
+    }
   }
 
   /**

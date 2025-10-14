@@ -69,7 +69,7 @@ export class Product {
 	@OneToMany(
 		() => ProductImage,
 		(productImage) => productImage.product,
-		{ cascade: true } //cascade: true -> si se elimina un producto, se eliminan sus imagenes
+		{ cascade: true, eager: true } // * cascade: true -> si se elimina un producto, se eliminan sus imagenes, ademas el 'eager: true' carga las imagenes automaticamente cuando se carga el producto 'relaciones de tablas'
 	)
 	images? : ProductImage[];
 
