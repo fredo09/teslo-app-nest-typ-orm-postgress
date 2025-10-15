@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
   NotFoundException, 
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 
 import { InjectRepository } from '@nestjs/typeorm';
@@ -35,6 +35,9 @@ export class ProductsService {
 
     @InjectRepository(ProductImage)
     private readonly productImageRepository: Repository<ProductImage>,
+
+    // * Inyectamos el data source para manejar transacciones
+    private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -123,29 +126,50 @@ export class ProductsService {
    * @param updateProductDto datos a actualizar
    * @returns 
    */
-  async update(
-    id: string,
-    {
-      images = [],
-      ...updateProductDetail
-    }: UpdateProductDto
-  ) {
-    try {
-      //! prepara para la actualizacion
-      const productUpdate = await this.productsRepository.preload({
-        id,
-        ...updateProductDetail,
-        images: []
-      });
+  async update( id: string, { images = [], ...updateProductDetail }: UpdateProductDto ) {
+    //! prepara para la actualizacion
+    const productUpdate = await this.productsRepository.preload({
+      id,
+      ...updateProductDetail,
+    });
+    
+    if (!productUpdate)
+      throw new NotFoundException(`Product with id ${id} not found`);
 
-      if (!productUpdate)
-        throw new NotFoundException(`Product with id ${id} not found`);
+    //* Crear query runner y empezamos a realizar la transaccion
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // * Realizamos las operaciones de la transacción aqui
+      if (images && images.length > 0) {
+        // * Eliminar las imagenes existentes del producto
+        await queryRunner.manager.delete(ProductImage, {product: { id }});
+        productUpdate.images = images.map(
+          image => this.productImageRepository.create({ url: image })
+        );
+      }
+
+      await queryRunner.manager.save(productUpdate);
 
       //! realiza la actualizacion
-      const updatedProduct = await this.productsRepository.save(productUpdate);
-      return updatedProduct;
+      /**
+       * comentado por sustitucion de transacciones 
+       * const updatedProduct = await this.productsRepository.save(productUpdate);
+       **/
 
+      // * Si todas las operaciones son exitosas, confirmamos la transacción y liberamos el query runner
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+
+      return this.findOnePlainProduct(id);
     } catch (error) {
+      // * Si ocurre un error, revertimos la transacción y liberamos el query runner
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+
       this._handleExceptions(error);
     }
   }
