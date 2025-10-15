@@ -19,7 +19,9 @@ import { ProductImage } from "./product-image.entity";
  * @author fredy_vazzqz
  * @version 1.0.0
  */
-@Entity()
+
+ // * nombre de la tabla en la bd
+@Entity({ name: 'products' })
 export class Product {
 	@PrimaryGeneratedColumn('uuid')
 	id: string;

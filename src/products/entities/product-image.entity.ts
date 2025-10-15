@@ -17,7 +17,8 @@ import { Product } from "./product.entity";
  * @version 1.0.0
  */
 
-@Entity()
+// * nombre de la tabla en la bd
+@Entity({ name: 'product_images' })
 export class ProductImage {
 	@PrimaryGeneratedColumn()
 	id: number;
