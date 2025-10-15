@@ -21,11 +21,16 @@ Ya se tiene una configuración inicial sobre como levantar la imagen con el arch
 $ docker compose up -d
 ```
 
+# Ejecutar SEED 
+```
+http://localhost:3000/api/seed
+```
+
 ## Compile and run the project
 
 ```bash
 # development
-$ npm run start
+$ npm run start:dev
 ```
 
 ## Description FrameWork
