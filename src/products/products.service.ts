@@ -186,6 +186,23 @@ export class ProductsService {
   }
 
   /**
+   * Elimina todos los productos de la base de datos
+   * Manejo de insersion para la semilla de productos 'SEDD'
+   * @returns 
+   */
+  async deleteAllProducts() {
+    const query = this.productsRepository.createQueryBuilder('product');
+    try {
+      return await query
+        .delete()
+        .where({})
+        .execute();
+    } catch(error) {
+      this._handleExceptions(error);
+    }
+  }
+
+  /**
    * @description Maneja las excepciones lanzadas por la base de datos
    * @param error 
    */

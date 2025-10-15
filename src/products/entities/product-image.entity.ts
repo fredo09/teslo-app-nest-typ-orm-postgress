@@ -28,6 +28,7 @@ export class ProductImage {
 	@ManyToOne(
 		() => Product,
 		(product) => product.images,
+		{ onDelete: 'CASCADE' } // Si se elimina un producto, eliminar también sus imágenes asociadas
 	)
 	product: Product
 }
