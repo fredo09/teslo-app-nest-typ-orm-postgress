@@ -5,13 +5,14 @@ import {
   InternalServerErrorException,
   NotFoundException, 
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
-import { Product } from './entities/product.entity';
+import { ProductImage, Product } from './entities';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 /**
@@ -31,6 +32,12 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
+
+    @InjectRepository(ProductImage)
+    private readonly productImageRepository: Repository<ProductImage>,
+
+    // * Inyectamos el data source para manejar transacciones
+    private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -38,12 +45,17 @@ export class ProductsService {
    * @param createProductDto datos para crear un nuevo producto
    * @returns 
    */
-  async create(createProductDto: CreateProductDto) {
+  async create({ images = [], ...productDetails }: CreateProductDto) {
     try {
-      const savedProduct = this.productsRepository.create(createProductDto);
+      const savedProduct = this.productsRepository.create({
+        ...productDetails,
+        images: images.map(image => this.productImageRepository.create({
+          url: image
+        }))
+      });
       await this.productsRepository.save(savedProduct);
 
-      return savedProduct;
+      return { ...savedProduct, images };
     } catch (error) {
       this._handleExceptions(error);
     }
@@ -53,13 +65,20 @@ export class ProductsService {
    * Encontrar todos los productos
    * @returns Una lista de todos los productos
    */
-  findAll(paginationDto: PaginationDto) {
-    const { limit = 10, offSet = 0 } = paginationDto;
-    return this.productsRepository.find({
+  async findAll({ limit = 10, offSet = 0 } : PaginationDto) {
+    const findProducts = await this.productsRepository.find({
       take: limit,
-      skip: offSet
+      skip: offSet,
       //TODO: relaciones
+      relations: {
+        images: true
+      }
     });
+
+    return findProducts.map(({ images, ...restProduct }) => ({
+      ...restProduct,
+      images: (images || [] ).map( img => img.url)
+    }))
   }
 
   /**
@@ -74,11 +93,11 @@ export class ProductsService {
       product = await this.productsRepository.findOneBy({ id: term });
     } else {
       // product = await this.productsRepository.findOneBy({ slug: term });
-      const queryBuilder = this.productsRepository.createQueryBuilder(); //* Creacion de un query builder
-      product = await queryBuilder.where('UPPER(title) =:title or slug =: slug', {
+      const queryBuilder = this.productsRepository.createQueryBuilder('prod'); //* Creacion de un query builder
+      product = await queryBuilder.where('UPPER(title)=:title or slug=:slug', {
         title: term.toUpperCase(),
         slug: term.toLowerCase()
-      }).getOne();
+      }).leftJoinAndSelect('prod.images', 'prodImages').getOne();
     }
 
     if (!product)
@@ -88,27 +107,69 @@ export class ProductsService {
   }
 
   /**
+   * Busca un producto por su término de búsqueda y devuelve una versión simplificada
+   * del producto con solo las URLs de las imágenes.
+   * @param term termino de busqueda
+   * @returns {Object} objeto del producto con URLs de imágenes
+   */
+  async findOnePlainProduct(term: string) {
+    const { images = [], ...restProduct } = await this.findOne(term);
+    return {
+      ...restProduct,
+      images: images.map( img => img.url)
+    }
+  }
+
+  /**
    * Actualiza un producto por su ID
    * @param id identificador del producto a actualizar
    * @param updateProductDto datos a actualizar
    * @returns 
    */
-  async update(id: string, updateProductDto: UpdateProductDto) {
-    try {
-      //! prepara para la actualizacion
-      const productUpdate = await this.productsRepository.preload({
-        id,
-        ...updateProductDto
-      });
+  async update( id: string, { images = [], ...updateProductDetail }: UpdateProductDto ) {
+    //! prepara para la actualizacion
+    const productUpdate = await this.productsRepository.preload({
+      id,
+      ...updateProductDetail,
+    });
+    
+    if (!productUpdate)
+      throw new NotFoundException(`Product with id ${id} not found`);
 
-      if (!productUpdate)
-        throw new NotFoundException(`Product with id ${id} not found`);
+    //* Crear query runner y empezamos a realizar la transaccion
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // * Realizamos las operaciones de la transacción aqui
+      if (images && images.length > 0) {
+        // * Eliminar las imagenes existentes del producto
+        await queryRunner.manager.delete(ProductImage, {product: { id }});
+        productUpdate.images = images.map(
+          image => this.productImageRepository.create({ url: image })
+        );
+      }
+
+      await queryRunner.manager.save(productUpdate);
 
       //! realiza la actualizacion
-      const updatedProduct = await this.productsRepository.save(productUpdate);
-      return updatedProduct;
+      /**
+       * comentado por sustitucion de transacciones 
+       * const updatedProduct = await this.productsRepository.save(productUpdate);
+       **/
 
+      // * Si todas las operaciones son exitosas, confirmamos la transacción y liberamos el query runner
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+
+      return this.findOnePlainProduct(id);
     } catch (error) {
+      // * Si ocurre un error, revertimos la transacción y liberamos el query runner
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+
       this._handleExceptions(error);
     }
   }
@@ -122,6 +183,23 @@ export class ProductsService {
     const findProduct = await this.findOne(id);
     await this.productsRepository.remove(findProduct);
     return `Product with id ${id} has been removed` ;
+  }
+
+  /**
+   * Elimina todos los productos de la base de datos
+   * Manejo de insersion para la semilla de productos 'SEDD'
+   * @returns 
+   */
+  async deleteAllProducts() {
+    const query = this.productsRepository.createQueryBuilder('product');
+    try {
+      return await query
+        .delete()
+        .where({})
+        .execute();
+    } catch(error) {
+      this._handleExceptions(error);
+    }
   }
 
   /**

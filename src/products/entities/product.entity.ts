@@ -1,5 +1,14 @@
 //! Cada entity es una tabla en la bd
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { 
+	BeforeInsert,
+	BeforeUpdate,
+	Column,
+	Entity,
+	OneToMany,
+	PrimaryGeneratedColumn
+} from "typeorm";
+
+import { ProductImage } from "./product-image.entity";
 
 /**
  * Entidad de producto
@@ -10,7 +19,9 @@ import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } fr
  * @author fredy_vazzqz
  * @version 1.0.0
  */
-@Entity()
+
+ // * nombre de la tabla en la bd
+@Entity({ name: 'products' })
 export class Product {
 	@PrimaryGeneratedColumn('uuid')
 	id: string;
@@ -55,6 +66,14 @@ export class Product {
 		default: []
 	})
 	tags: string[];
+
+	//! relacion de images con product
+	@OneToMany(
+		() => ProductImage,
+		(productImage) => productImage.product,
+		{ cascade: true, eager: true } // * cascade: true -> si se elimina un producto, se eliminan sus imagenes, ademas el 'eager: true' carga las imagenes automaticamente cuando se carga el producto 'relaciones de tablas'
+	)
+	images? : ProductImage[];
 
 	//* Usamos el before Insert y BeforeUpdate para hacer algo antes de insertar o actualizar
 	@BeforeInsert()
