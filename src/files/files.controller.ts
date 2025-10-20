@@ -1,7 +1,14 @@
-import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Post,
+  Controller,
+  UploadedFile, 
+  UseInterceptors,
+  BadRequestException
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { FilesService } from './files.service';
+import { fileFilter } from './helpers/fileFilter.helper';
 
 
 /**
@@ -17,11 +24,15 @@ export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @Post('product')
-  @UseInterceptors(FileInterceptor('file')) // 'file' es el nombre del campo en el formulario que contiene el archivo
+  @UseInterceptors(FileInterceptor('file', {
+    fileFilter: fileFilter
+  })) // 'file' es el nombre del campo en el formulario que contiene el archivo
   uploadProductImageFile(
     @UploadedFile() file: Express.Multer.File, // 'Indica el tipado de file ' Express.Multer.File
   ) {
-    
+    if (!file) {
+      throw new BadRequestException('File not provided or invalid');
+    }
 
     return file;
   }
