@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
+import { diskStorage } from 'multer';
 import { FilesService } from './files.service';
 import { fileFilter } from './helpers/fileFilter.helper';
 
@@ -25,7 +26,13 @@ export class FilesController {
 
   @Post('product')
   @UseInterceptors(FileInterceptor('file', {
-    fileFilter: fileFilter
+    fileFilter: fileFilter,
+    limits: {
+      fileSize: 1000,
+    },
+    storage: diskStorage({
+      destination: './static/uploads',
+    })
   })) // 'file' es el nombre del campo en el formulario que contiene el archivo
   uploadProductImageFile(
     @UploadedFile() file: Express.Multer.File, // 'Indica el tipado de file ' Express.Multer.File
