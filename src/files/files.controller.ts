@@ -11,7 +11,6 @@ import { diskStorage } from 'multer';
 import { FilesService } from './files.service';
 import { fileFilter } from './helpers/fileFilter.helper';
 
-
 /**
  * Controlador para la gestión de archivos.
  * Proporciona endpoints para subir y manejar archivos.
@@ -24,6 +23,11 @@ import { fileFilter } from './helpers/fileFilter.helper';
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
+  /**
+   * Maneja la subida de imágenes de productos.
+   * @param file - El archivo subido.
+   * @returns 
+   */
   @Post('product')
   @UseInterceptors(FileInterceptor('file', {
     fileFilter: fileFilter,
