@@ -69,7 +69,6 @@ export class ProductsService {
     const findProducts = await this.productsRepository.find({
       take: limit,
       skip: offSet,
-      //TODO: relaciones
       relations: {
         images: true
       }
@@ -77,7 +76,7 @@ export class ProductsService {
 
     return findProducts.map(({ images, ...restProduct }) => ({
       ...restProduct,
-      images: (images || [] ).map( img => img.url)
+      images: ( images || [] ).map( img => img.url)
     }))
   }
 
