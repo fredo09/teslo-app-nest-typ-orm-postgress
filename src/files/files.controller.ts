@@ -6,7 +6,8 @@ import {
   BadRequestException,
   Get,
   Param,
-  Res
+  Res,
+  Inject
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -14,6 +15,7 @@ import { diskStorage } from 'multer';
 import { FilesService } from './files.service';
 import { fileFilter, fileNamer } from './helpers';
 import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * Controlador para la gestión de archivos.
@@ -25,7 +27,10 @@ import { Response } from 'express';
 
 @Controller('files')
 export class FilesController {
-  constructor(private readonly filesService: FilesService) {}
+  constructor(
+    private readonly filesService: FilesService,
+    private readonly configService: ConfigService //Obtenermos la congiguración del .env
+  ) {}
 
   @Get('product/:imageName')
   fileProductImage(
@@ -59,8 +64,9 @@ export class FilesController {
       throw new BadRequestException('File not provided or invalid');
     }
 
-    const secureUrl = `${file.filename}`
+    //TODO: CAMBIAR POR LA URL DEL LA IMAGEN 
+    const secureUrl = `${this.configService.get('HOST_API')}/files/product/${file.filename}`;
 
-    return {fileImage: secureUrl};
+    return { url: secureUrl };
   }
 }

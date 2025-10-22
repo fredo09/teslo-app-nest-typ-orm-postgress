@@ -31,6 +31,6 @@ import { FilesModule } from './files/files.module';
     CommonModule,
     SeedModule,
     FilesModule,
-  ],
+  ]
 })
 export class AppModule {}
