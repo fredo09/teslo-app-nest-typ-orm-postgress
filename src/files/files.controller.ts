@@ -3,13 +3,17 @@ import {
   Controller,
   UploadedFile, 
   UseInterceptors,
-  BadRequestException
+  BadRequestException,
+  Get,
+  Param,
+  Res
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { diskStorage } from 'multer';
 import { FilesService } from './files.service';
-import { fileFilter } from './helpers/fileFilter.helper';
+import { fileFilter, fileNamer } from './helpers';
+import { Response } from 'express';
 
 /**
  * Controlador para la gestión de archivos.
@@ -23,6 +27,15 @@ import { fileFilter } from './helpers/fileFilter.helper';
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
+  @Get('product/:imageName')
+  fileProductImage(
+    @Res() res: Response, // -> Response de Express
+    @Param('imageName') imageName: string,
+  ) {
+    const path = this.filesService.getStaticProductImage(imageName);
+    res.sendFile(path);
+  }
+
   /**
    * Maneja la subida de imágenes de productos.
    * @param file - El archivo subido.
@@ -32,10 +45,11 @@ export class FilesController {
   @UseInterceptors(FileInterceptor('file', {
     fileFilter: fileFilter,
     limits: {
-      fileSize: 1000,
+      fileSize: 800000, // Tamaño máximo del archivo en bytes (800 KB)
     },
     storage: diskStorage({
-      destination: './static/uploads',
+      destination: './static/products', // Carpeta donde se guardarán los archivos subidos
+      filename: fileNamer, //Renombrar el archivo usando el helper fileNamer
     })
   })) // 'file' es el nombre del campo en el formulario que contiene el archivo
   uploadProductImageFile(
@@ -45,6 +59,8 @@ export class FilesController {
       throw new BadRequestException('File not provided or invalid');
     }
 
-    return file;
+    const secureUrl = `${file.filename}`
+
+    return {fileImage: secureUrl};
   }
 }

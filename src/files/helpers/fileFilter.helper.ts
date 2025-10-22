@@ -11,15 +11,14 @@ export const fileFilter = (
 	callback: Function,
 ) => {
 	// Lógica del filtro de archivos
-
 	if (!file) return callback(new Error('file is empty'), false);
 
 	const fileExtension = file.mimetype.split('/')[1];
 	const validExtensions = ['jpg', 'jpeg', 'png', 'gif'];
 
-	if (!validExtensions.includes(fileExtension)) {
-		return callback(new Error('Invalid file type'), false);
+	if (validExtensions.includes(fileExtension)) {
+		return callback(null, true);
 	}
 
-	callback(null, true);
+	callback(null, false);
 }

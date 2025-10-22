@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { join } from 'path';
+import { existsSync } from 'fs';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 /**
  * Servicio para la gestión de archivos.
@@ -8,4 +10,18 @@ import { Injectable } from '@nestjs/common';
  */
 @Injectable()
 export class FilesService {
+
+	/**
+	 * Obtiene la ruta de la imagen de producto estática.
+	 * @param imageName - Nombre de la imagen a buscar.
+	 * @returns La ruta de la imagen si existe, o lanza una excepción si no.
+	 */
+	getStaticProductImage(imageName: string) {
+		const path = join(__dirname, '../../static/products', imageName);
+
+		if (!existsSync(path)) 
+			throw new BadRequestException(`Image not found with ${imageName}`);
+
+		return path;
+	}
 }
