@@ -7,7 +7,6 @@ export class User {
 
 	@Column('text', {
 		unique: true,
-
 	})
 	email: string;
 
@@ -20,7 +19,9 @@ export class User {
 	})
 	fullName: string;
 
-	@Column('bool')
+	@Column('bool', {
+		default: true,
+	})
 	isActive: boolean;
 
 	@Column("text", {
