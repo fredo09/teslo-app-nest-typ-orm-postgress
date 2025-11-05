@@ -7,7 +7,6 @@ import {
   Get,
   Param,
   Res,
-  Inject
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
