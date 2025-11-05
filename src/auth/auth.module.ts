@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { User } from './entities/user.entity';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
   controllers: [AuthController],
@@ -12,7 +13,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   imports: [
     TypeOrmModule.forFeature([ //* Nos permite importar las entidades y hacer tablas en DB
       User
-    ])
+    ]),
+    CommonModule //* -> importamos el CommonModule para usar el BcryptAdapter 
   ]
 })
 export class AuthModule {}

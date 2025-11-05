@@ -2,9 +2,11 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
+import { User } from './entities/user.entity';
+
 import { CreateUserDto } from './dto/user.dto';
 
-import { User } from './entities/user.entity';
+import { BcryptAdapter } from './../common/adapter/bcrypt.adatper';
 
 /**
  * Servicio de autenticación
@@ -21,7 +23,8 @@ export class AuthService {
 
   constructor(
     @InjectRepository(User) //! ->ser ocupa para un repositorio de TypeORM y entity User
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+    private readonly bcryptAdapter: BcryptAdapter
   ) {}
 
   /**
@@ -31,7 +34,14 @@ export class AuthService {
    */
   async create(createUserDto: CreateUserDto) {
     try {
-      const user = this.userRepository.create(createUserDto);
+      const { password, ...userData } = createUserDto;
+
+      const user = this.userRepository.create({
+        ...userData,
+        password: this.bcryptAdapter.hashSync(password),
+      });
+
+      //TODO: QUITAR EL PASSWORD DEL RETORNO DEL USUARIO CREADO
       return await this.userRepository.save(user);
     } catch (error) {
       this._handleDBErrors(error);
@@ -48,6 +58,7 @@ export class AuthService {
       throw new BadRequestException(error.detail);
 
     this.logger.error(error);
+    this.logger.log(`🚀 ~ ha ocurrido un error: ${error.message}`);
     throw new BadRequestException('Please check server logs');
   }
 }
