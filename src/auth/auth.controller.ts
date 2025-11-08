@@ -1,7 +1,7 @@
 import { AuthService } from './auth.service';
 import { Controller, Post, Body } from '@nestjs/common';
 
-import { CreateUserDto } from './dto/user.dto';
+import { CreateUserDto, LoginUserDto } from './dto';
 
 /**
  * Controlador de autenticación que maneja las solicitudes relacionadas con la autenticación de usuarios.
@@ -14,8 +14,23 @@ import { CreateUserDto } from './dto/user.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  /**
+   * Crea un nuevo usuario
+   * @param createUserDto datos para crear un nuevo usuario
+   * @returns {CreateUserDto} el usuario creado
+   */
   @Post('register')
-  create(@Body() createUserDto: CreateUserDto) {
+  createUser(@Body() createUserDto: CreateUserDto) {
     return this.authService.create(createUserDto);
+  }
+
+  /**
+   * 
+   * @param loginUserDto 
+   * @returns 
+   */
+  @Post('login')
+  loginUser(@Body() loginUserDto: LoginUserDto) {
+    return '';
   }
 }
