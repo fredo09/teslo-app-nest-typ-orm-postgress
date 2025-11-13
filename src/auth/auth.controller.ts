@@ -25,12 +25,12 @@ export class AuthController {
   }
 
   /**
-   * 
-   * @param loginUserDto 
-   * @returns 
+   * Inicia sesión de un usuario
+   * @param {LoginUserDto} datos de inicio de sesión
+   * @returns el usuario autenticado
    */
   @Post('login')
   loginUser(@Body() loginUserDto: LoginUserDto) {
-    return '';
+    return this.authService.login(loginUserDto);
   }
 }

@@ -1,11 +1,9 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 
 import { User } from './entities/user.entity';
-
-import { CreateUserDto } from './dto/user.dto';
-
+import { CreateUserDto, LoginUserDto } from './dto';
 import { BcryptAdapter } from './../common/adapter/bcrypt.adatper';
 
 /**
@@ -29,7 +27,7 @@ export class AuthService {
 
   /**
    * Crea un nuevo usuario
-   * @param createUserDto datos para crear un nuevo usuario
+   * @param {createUserDto} datos para crear un nuevo usuario
    * @returns {CreateUserDto}
    */
   async create(createUserDto: CreateUserDto) {
@@ -46,6 +44,27 @@ export class AuthService {
     } catch (error) {
       this._handleDBErrors(error);
     }
+  }
+
+  /**
+   * Inicia sesión de un usuario
+   * @param {LoginUserDto} datos de inicio de sesión
+   * @returns el usuario autenticado
+   */
+  async login({ email, password }: LoginUserDto) {
+    const findUser = await this.userRepository.findOne({
+      where: { email },
+      select: { email: true, password: true } // * seleccionamos el password ya que por defecto no se selecciona
+    });
+
+    if (!findUser)
+      throw new UnauthorizedException('Credentials are not valid (email or password)');
+
+    if(!this.bcryptAdapter.compareSync(password, findUser.password))
+      throw new UnauthorizedException('Credentials are not valid (email or password)');
+
+    //TODO: RETORNAR EL JWT
+    return findUser;
   }
 
   /**

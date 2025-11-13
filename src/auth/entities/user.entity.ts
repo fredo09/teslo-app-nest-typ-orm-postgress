@@ -10,7 +10,9 @@ export class User {
 	})
 	email: string;
 
-	@Column('text')
+	@Column('text', {
+		select: false, //* -> para que no se devuelva el password en las consultas normales
+	})
 	password: string;
 
 	@Column({
