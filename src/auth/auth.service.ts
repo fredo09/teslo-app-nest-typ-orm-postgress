@@ -5,6 +5,7 @@ import { BadRequestException, Injectable, Logger, UnauthorizedException } from '
 import { User } from './entities/user.entity';
 import { CreateUserDto, LoginUserDto } from './dto';
 import { BcryptAdapter } from './../common/adapter/bcrypt.adatper';
+import { find } from 'rxjs';
 
 /**
  * Servicio de autenticación
@@ -57,10 +58,12 @@ export class AuthService {
       select: { email: true, password: true } // * seleccionamos el password ya que por defecto no se selecciona
     });
 
+    const isValidPassword = this.bcryptAdapter.compareSync(password, findUser?.password || '');
+
     if (!findUser)
       throw new UnauthorizedException('Credentials are not valid (email or password)');
 
-    if(!this.bcryptAdapter.compareSync(password, findUser.password))
+    if (!isValidPassword)
       throw new UnauthorizedException('Credentials are not valid (email or password)');
 
     //TODO: RETORNAR EL JWT
