@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -8,13 +9,15 @@ import { AuthController } from './auth.controller';
 
 import { User } from './entities/user.entity';
 
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from 'src/common/common.module';
+
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
   imports: [
+    ConfigModule,
     TypeOrmModule.forFeature([ //* Nos permite importar las entidades y hacer tablas en DB
       User
     ]),
@@ -42,6 +45,7 @@ import { CommonModule } from 'src/common/common.module';
     }),
 
     CommonModule //* -> importamos el CommonModule para usar el BcryptAdapter 
-  ]
+  ],
+  exports: [TypeOrmModule, JwtStrategy, JwtModule, PassportModule]
 })
 export class AuthModule {}
