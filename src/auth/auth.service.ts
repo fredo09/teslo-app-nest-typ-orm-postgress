@@ -45,9 +45,9 @@ export class AuthService {
       await this.userRepository.save(user);
 
       return {
-        email: userData?.email,
-        fullName: userData?.fullName,
-        token: this._getJwtToken({ email: userData?.email })
+        email: user?.email,
+        fullName: user?.fullName,
+        token: this._getJwtToken({ id: user?.id })
       }
 
     } catch (error) {
@@ -63,7 +63,7 @@ export class AuthService {
   async login({ email, password }: LoginUserDto) {
     const findUser = await this.userRepository.findOne({
       where: { email },
-      select: { email: true, password: true } // * seleccionamos el password ya que por defecto no se selecciona
+      select: { email: true, password: true, id: true } // * seleccionamos el password ya que por defecto no se selecciona
     });
 
     const isValidPassword = this.bcryptAdapter.compareSync(password, findUser?.password || '');
@@ -76,7 +76,7 @@ export class AuthService {
 
     return {
       ...findUser,
-      token: this._getJwtToken({ email: findUser?.email })
+      token: this._getJwtToken({ id: findUser?.id })
     };
   }
 
