@@ -1,10 +1,12 @@
 import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 
 import { User } from './entities/user.entity';
 import { CreateUserDto, LoginUserDto } from './dto';
 import { BcryptAdapter } from './../common/adapter/bcrypt.adatper';
+import { JwtPayloadI } from './interfaces/jwt-payload.interface';
 
 /**
  * Servicio de autenticación
@@ -22,7 +24,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User) //! ->ser ocupa para un repositorio de TypeORM y entity User
     private readonly userRepository: Repository<User>,
-    private readonly bcryptAdapter: BcryptAdapter
+    private readonly bcryptAdapter: BcryptAdapter,
+    private readonly jwtService: JwtService
   ) {}
 
   /**
@@ -39,8 +42,14 @@ export class AuthService {
         password: this.bcryptAdapter.hashSync(password),
       });
 
-      //TODO: QUITAR EL PASSWORD DEL RETORNO DEL USUARIO CREADO
-      return await this.userRepository.save(user);
+      await this.userRepository.save(user);
+
+      return {
+        email: userData?.email,
+        fullName: userData?.fullName,
+        token: this._getJwtToken({ email: userData?.email })
+      }
+
     } catch (error) {
       this._handleDBErrors(error);
     }
@@ -65,8 +74,21 @@ export class AuthService {
     if (!isValidPassword)
       throw new UnauthorizedException('Credentials are not valid (email or password)');
 
-    //TODO: RETORNAR EL JWT
-    return findUser;
+    return {
+      ...findUser,
+      token: this._getJwtToken({ email: findUser?.email })
+    };
+  }
+
+  /**
+   * Genera un JWT  
+   * @param payload 
+   * @returns {Token}
+   * @private
+   */
+  private _getJwtToken(payload: JwtPayloadI) {
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 
   /**
