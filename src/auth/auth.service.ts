@@ -88,8 +88,7 @@ export class AuthService {
    * @private
    */
   private _getJwtToken(payload: JwtPayloadI) {
-    const token = this.jwtService.sign(payload);
-    return token;
+    return this.jwtService.sign(payload);
   }
 
   /**
