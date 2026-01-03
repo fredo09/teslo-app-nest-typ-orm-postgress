@@ -1,8 +1,17 @@
 import { AuthService } from './auth.service';
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { 
+  Controller,
+  Get,
+  Post, 
+  Body,
+  UseGuards,
+  Req 
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 import { CreateUserDto, LoginUserDto } from './dto';
-import { AuthGuard } from '@nestjs/passport';
+import { GetRawHeadersDecorator, GetUserDecorator } from './decorators';
+import { User } from './entities/user.entity';
 
 /**
  * Controlador de autenticación que maneja las solicitudes relacionadas con la autenticación de usuarios.
@@ -41,13 +50,19 @@ export class AuthController {
    */
   @Get('private')
   @UseGuards(AuthGuard()) //* Protege la ruta con AuthGuard con ajustes y tokens JWT
-  testingPrivateRoute() {
+  testingPrivateRoute(
+    // @Req() request: Express.Request -> docorador por defecto de NestJS y request de Express
+    @GetUserDecorator() user: User,
+    @GetUserDecorator('email') userEmail: string,
+    @GetRawHeadersDecorator() rawHeaders: string[]
+  ) {
+
     return {
       ok: true,
       message: 'Hola Mundo Private',
-      user: {
-        name: 'Alfredo'
-      }
+      user,
+      userEmail,
+      rawHeaders
     }
   }
 }
