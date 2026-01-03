@@ -4,10 +4,11 @@ import {
   Get,
   Post, 
   Body,
-  UseGuards,
-  Req 
+  UseGuards, 
+  SetMetadata
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { UserRoleGuard } from './guards/user-role/user-role.guard';
 
 import { CreateUserDto, LoginUserDto } from './dto';
 import { GetRawHeadersDecorator, GetUserDecorator } from './decorators';
@@ -56,13 +57,26 @@ export class AuthController {
     @GetUserDecorator('email') userEmail: string,
     @GetRawHeadersDecorator() rawHeaders: string[]
   ) {
-
     return {
       ok: true,
       message: 'Hola Mundo Private',
       user,
       userEmail,
       rawHeaders
+    }
+  }
+
+
+  @Get('private2')
+  @SetMetadata('roles', ['admin', 'superUser']) //* Asigna metadatos personalizados a la ruta
+  @UseGuards(AuthGuard(), UserRoleGuard) //* Protege la ruta con AuthGuard con ajustes y tokens JWT
+  testingPrivateRoute2(
+    @GetUserDecorator() user: User
+  ) {
+    return {
+      ok: true,
+      message: 'Hola Mundo Private 2',
+      user
     }
   }
 }
