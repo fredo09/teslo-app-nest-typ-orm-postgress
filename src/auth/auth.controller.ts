@@ -12,7 +12,10 @@ import { UserRoleGuard } from './guards/user-role/user-role.guard';
 
 import { CreateUserDto, LoginUserDto } from './dto';
 import { GetRawHeadersDecorator, GetUserDecorator } from './decorators';
+
 import { User } from './entities/user.entity';
+import { ValidRoles } from './interfaces';
+import { RolesProtected } from './decorators/roles-protected/roles-protected.decorator';
 
 /**
  * Controlador de autenticación que maneja las solicitudes relacionadas con la autenticación de usuarios.
@@ -66,16 +69,29 @@ export class AuthController {
     }
   }
 
+  //! FORMA MUY TEDIOSA DE PROTEGER RUTAS CON ROLES Y RECUPERAR DATA DE USUARIO LOGEADO
+  // @Get('private2')
+  // @SetMetadata('roles', ['admin', 'superUser']) //* Asigna metadatos personalizados a la ruta
+  // @UseGuards(AuthGuard(), UserRoleGuard) //* Protege la ruta con AuthGuard con ajustes y tokens JWT
+  // testingPrivateRoute2(
+  //   @GetUserDecorator() user: User
+  // ) {
+  //   return {
+  //     ok: true,
+  //     message: 'Hola Mundo Private 2',
+  //     user
+  //   }
+  // }
 
   @Get('private2')
-  @SetMetadata('roles', ['admin', 'superUser']) //* Asigna metadatos personalizados a la ruta
+  @RolesProtected(ValidRoles.admin, ValidRoles.user) //* Protege la ruta con roles (sin especificar roles, permite todos)
   @UseGuards(AuthGuard(), UserRoleGuard) //* Protege la ruta con AuthGuard con ajustes y tokens JWT
   testingPrivateRoute2(
     @GetUserDecorator() user: User
   ) {
     return {
       ok: true,
-      message: 'Hola Mundo Private 2',
+      message: 'Hola Mundo Private 2 con roles definidos',
       user
     }
   }

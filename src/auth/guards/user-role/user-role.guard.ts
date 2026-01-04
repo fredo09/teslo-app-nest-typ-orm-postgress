@@ -1,7 +1,8 @@
 import { BadGatewayException, CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { User } from 'src/auth/entities/user.entity';
+import { META_ROLES } from 'src/auth/decorators/roles-protected/roles-protected.decorator';
+// import { User } from 'src/auth/entities/user.entity';
 
 /**
  * Guardia de rol de usuario para proteger rutas basadas en roles.
@@ -17,7 +18,7 @@ export class UserRoleGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     // * Obtener los roles válidos desde los metadatos de la ruta
-    const validRoles: string[] = this.reflector.get<string[]>('roles', context.getHandler());
+    const validRoles: string[] = this.reflector.get<string[]>(META_ROLES, context.getHandler());
     const { user } = context.switchToHttp().getRequest();
     // const { user }: { user: User } = context.switchToHttp().getRequest();
 
