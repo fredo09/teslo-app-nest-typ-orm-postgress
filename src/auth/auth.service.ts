@@ -7,7 +7,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto, LoginUserDto } from './dto';
 import { BcryptAdapter } from './../common/adapter/bcrypt.adatper';
 
-import { JwtPayloadI } from './interfaces/jwt-payload.interface';
+import { JwtPayloadI } from './interfaces';
 
 /**
  * Servicio de autenticación
