@@ -11,11 +11,11 @@ import { AuthGuard } from '@nestjs/passport';
 import { UserRoleGuard } from './guards/user-role/user-role.guard';
 
 import { CreateUserDto, LoginUserDto } from './dto';
-import { GetRawHeadersDecorator, GetUserDecorator } from './decorators';
+import { Auth, GetRawHeadersDecorator, GetUserDecorator } from './decorators';
 
 import { User } from './entities/user.entity';
 import { ValidRoles } from './interfaces';
-import { RolesProtected } from './decorators/roles-protected/roles-protected.decorator';
+import { RolesProtected } from './decorators';
 
 /**
  * Controlador de autenticación que maneja las solicitudes relacionadas con la autenticación de usuarios.
@@ -83,6 +83,8 @@ export class AuthController {
   //   }
   // }
 
+
+  //! FORMA MEJORADA DE PROTEGER RUTAS CON ROLES Y RECUPERAR DATA DE USUARIO LOGEADO USANDO UN ROLE DECORATOR 
   @Get('private2')
   @RolesProtected(ValidRoles.admin, ValidRoles.user) //* Protege la ruta con roles (sin especificar roles, permite todos)
   @UseGuards(AuthGuard(), UserRoleGuard) //* Protege la ruta con AuthGuard con ajustes y tokens JWT
@@ -92,6 +94,21 @@ export class AuthController {
     return {
       ok: true,
       message: 'Hola Mundo Private 2 con roles definidos',
+      user
+    }
+  }
+
+  /*
+    !FORMA MEJORADA DE PROTEGER RUTAS CON ROLES Y RECUPERAR DATA DE USUARIO LOGEADO USANDO UN CUSTOM ROLE DECORATOR PARA AGRUPAR MAS DECORADORES
+  */
+  @Get('private3')
+  @Auth(ValidRoles.user) //* Protege la ruta con AuthGuard con ajustes y tokens JWT
+  testingPrivateRoute3(
+    @GetUserDecorator() user: User
+  ) {
+    return {
+      ok: true,
+      message: 'Hola Mundo Private 3 con roles definidos',
       user
     }
   }
