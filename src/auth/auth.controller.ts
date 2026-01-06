@@ -3,8 +3,8 @@ import {
   Get,
   Post, 
   Body,
-  UseGuards, 
-  SetMetadata
+  UseGuards
+//  SetMetadata
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -99,7 +99,7 @@ export class AuthController {
   }
 
   /*
-    !FORMA MEJORADA DE PROTEGER RUTAS CON ROLES Y RECUPERAR DATA DE USUARIO LOGEADO USANDO UN CUSTOM ROLE DECORATOR PARA AGRUPAR MAS DECORADORES
+  !FORMA MEJORADA DE PROTEGER RUTAS CON ROLES Y RECUPERAR DATA DE USUARIO LOGEADO USANDO UN CUSTOM ROLE DECORATOR PARA AGRUPAR MAS DECORADORES
   */
   @Get('private3')
   @Auth(ValidRoles.user) //* Protege la ruta con AuthGuard con ajustes y tokens JWT
