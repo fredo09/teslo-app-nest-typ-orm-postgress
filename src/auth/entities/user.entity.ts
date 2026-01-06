@@ -1,5 +1,23 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+	BeforeInsert,
+	BeforeUpdate,
+	Column,
+	Entity,
+	OneToMany,
+	PrimaryGeneratedColumn
+} from "typeorm";
 
+import { Product } from "src/products/entities";
+
+/**
+ * Entidad de usuario
+ * Representa la tabla de usuarios en la base de datos
+ * Define las columnas y sus propiedades
+ * Incluye relaciones con otras entidades (productos)
+ * Maneja eventos antes de insertar o actualizar registros
+ * @author Alfredo Vázquez
+ * @version 1.0.0
+ */
 @Entity('users')
 export class User {
 	@PrimaryGeneratedColumn('uuid')
@@ -31,6 +49,13 @@ export class User {
 		default: ['user'], //* -> por defecto todos los usuarios son 'user' (rol basico)
 	})
 	roles: string[];
+
+	//* Relacion de usuario a productos (un usuario puede tener muchos productos)
+	@OneToMany(
+		() => Product, //! -> entidad relacionada
+		(product) => product.user, //! -> propiedad de la entidad "Product" a la que se relaciona
+	)
+	product: Product[];
 
 	@BeforeInsert()
 	checkFieldsBeforeInsert() {

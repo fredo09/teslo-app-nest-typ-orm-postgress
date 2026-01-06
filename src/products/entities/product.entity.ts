@@ -4,11 +4,13 @@ import {
 	BeforeUpdate,
 	Column,
 	Entity,
+	ManyToOne,
 	OneToMany,
 	PrimaryGeneratedColumn
 } from "typeorm";
 
 import { ProductImage } from "./product-image.entity";
+import { User } from "src/auth/entities/user.entity";
 
 /**
  * Entidad de producto
@@ -74,6 +76,14 @@ export class Product {
 		{ cascade: true, eager: true } // * cascade: true -> si se elimina un producto, se eliminan sus imagenes, ademas el 'eager: true' carga las imagenes automaticamente cuando se carga el producto 'relaciones de tablas'
 	)
 	images? : ProductImage[];
+
+	//! -> relacion de muchos productos a un usuario
+	@ManyToOne(
+		() => User, //! -> entidad a la que se  relacionara
+		(User) => User.product, //! -> aqui sabra con que campo se relaciona (la propiedad product en la entidad User
+		{ eager: true } //! -> para que al traer un producto, traiga tambien el usuario que lo creo
+	)
+	user: User;
 
 	//* Usamos el before Insert y BeforeUpdate para hacer algo antes de insertar o actualizar
 	@BeforeInsert()
