@@ -14,6 +14,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 
 import { ProductImage, Product } from './entities';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { User } from 'src/auth/entities/user.entity';
 
 /**
  * Servicio de productos
@@ -45,13 +46,17 @@ export class ProductsService {
    * @param createProductDto datos para crear un nuevo producto
    * @returns 
    */
-  async create({ images = [], ...productDetails }: CreateProductDto) {
+  async create(
+    { images = [], ...productDetails }: CreateProductDto,
+    user: User
+  ) {
     try {
       const savedProduct = this.productsRepository.create({
         ...productDetails,
         images: images.map(image => this.productImageRepository.create({
           url: image
-        }))
+        })),
+        user
       });
       await this.productsRepository.save(savedProduct);
 
@@ -125,11 +130,16 @@ export class ProductsService {
    * @param updateProductDto datos a actualizar
    * @returns 
    */
-  async update( id: string, { images = [], ...updateProductDetail }: UpdateProductDto ) {
+  async update( 
+    id: string,
+    { images = [], ...updateProductDetail }: UpdateProductDto,
+    user: User
+  ) {
     //! prepara para la actualizacion
     const productUpdate = await this.productsRepository.preload({
       id,
       ...updateProductDetail,
+      user
     });
     
     if (!productUpdate)
@@ -151,6 +161,7 @@ export class ProductsService {
         );
       }
 
+      // productUpdate.user = user;
       await queryRunner.manager.save(productUpdate);
 
       //! realiza la actualizacion
