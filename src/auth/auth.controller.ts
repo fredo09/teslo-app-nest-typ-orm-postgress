@@ -69,6 +69,19 @@ export class AuthController {
     }
   }
 
+  /**
+   * Verifica el estado de autenticación del usuario y recupera un nuevo token JWT.
+   * @param user 
+   * @returns 
+   */
+  @Get('check-auth-status')
+  @Auth() //* Protege la ruta con AuthGuard con ajustes y tokens JWT
+  checkoutAuthStatus(
+    @GetUserDecorator() user: User
+  ) {
+    return this.authService.checkAuthStatus(user);
+  }
+
   //! FORMA MUY TEDIOSA DE PROTEGER RUTAS CON ROLES Y RECUPERAR DATA DE USUARIO LOGEADO
   // @Get('private2')
   // @SetMetadata('roles', ['admin', 'superUser']) //* Asigna metadatos personalizados a la ruta

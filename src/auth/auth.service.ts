@@ -82,6 +82,33 @@ export class AuthService {
   }
 
   /**
+   * Verifica el estado de autenticación del usuario
+   * @returns 
+   */
+  async checkAuthStatus( user: User ) {
+    const findUser = await this.userRepository.findOne({
+      where: { id: user.id },
+      select: { 
+        email: true,
+        id: true,
+        password: true,
+        fullName: true
+      }
+    });
+
+    if (!findUser)
+      throw new UnauthorizedException('User not found');
+
+    if (findUser.isActive)
+      throw new UnauthorizedException('User is not active');
+
+    return {
+      ...findUser,
+      token: this._getJwtToken({ id: findUser?.id })
+    }
+  }
+
+  /**
    * Genera un JWT  
    * @param payload 
    * @returns {Token}
