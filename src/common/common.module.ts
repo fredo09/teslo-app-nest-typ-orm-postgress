@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
+import { BcryptAdapter } from './adapter/bcrypt.adatper';
 
-@Module({})
+@Module({
+	providers: [ BcryptAdapter ],
+	exports: [ BcryptAdapter ],
+})
 export class CommonModule {}
+

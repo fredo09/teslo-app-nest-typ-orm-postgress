@@ -9,10 +9,16 @@ import {
   ParseUUIDPipe,
   Query
 } from '@nestjs/common';
+
 import { ProductsService } from './products.service';
+
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+
+import { Auth, GetUserDecorator } from 'src/auth/decorators';
+import { ValidRoles } from 'src/auth/interfaces';
+import { User } from 'src/auth/entities/user.entity';
 
 /**
  * Controlador de productos
@@ -25,6 +31,7 @@ import { PaginationDto } from 'src/common/dtos/pagination.dto';
  * @version 1.0.0
  */
 @Controller('products')
+// @Auth() //* -> Protege todas las rutas del controlador con autenticación
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
@@ -34,8 +41,12 @@ export class ProductsController {
    * @returns El producto creado
    */
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  @Auth()
+  create(
+    @Body() createProductDto: CreateProductDto,
+    @GetUserDecorator() user: User
+  ) {
+    return this.productsService.create(createProductDto, user);
   }
 
   /**
@@ -64,8 +75,13 @@ export class ProductsController {
    * @returns 
    */
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(id, updateProductDto);
+  @Auth(ValidRoles.admin)
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateProductDto: UpdateProductDto,
+    @GetUserDecorator() user: User
+  ) {
+    return this.productsService.update(id, updateProductDto, user);
   }
 
   /**
@@ -74,6 +90,7 @@ export class ProductsController {
    * @returns 
    */
   @Delete(':id')
+  @Auth(ValidRoles.admin)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.remove(id);
   }

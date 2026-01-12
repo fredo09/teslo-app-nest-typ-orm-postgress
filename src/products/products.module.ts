@@ -8,6 +8,9 @@ import { ProductsController } from './products.controller';
 // * ENTITIES
 import { Product, ProductImage } from './entities';
 
+// * IMPORTS MODULES
+import { AuthModule } from 'src/auth/auth.module';
+
 /**
  * Módulo de productos
  * Configura el módulo de productos en la aplicación NestJS
@@ -21,10 +24,12 @@ import { Product, ProductImage } from './entities';
   providers: [ProductsService],
   //* Importamos todos los entities para typeorm
   imports: [TypeOrmModule.forFeature([
-    // * Entities ORM -> Poner cada entidad que se cree y se vaya a usar en el modulo
-    Product,
-    ProductImage
-  ])],
+      // * Entities ORM -> Poner cada entidad que se cree y se vaya a usar en el modulo
+      Product,
+      ProductImage
+    ]),
+    AuthModule // * Importamos el AuthModule para usar en el ProductsModule
+  ],
   exports: [ProductsService] // * Exportamos el servicio para usarlo en otros modulos
 })
 export class ProductsModule {}
