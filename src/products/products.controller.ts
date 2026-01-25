@@ -19,6 +19,7 @@ import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Auth, GetUserDecorator } from 'src/auth/decorators';
 import { ValidRoles } from 'src/auth/interfaces';
 import { User } from 'src/auth/entities/user.entity';
+import { ApiTags } from '@nestjs/swagger';
 
 /**
  * Controlador de productos
@@ -30,6 +31,8 @@ import { User } from 'src/auth/entities/user.entity';
  * @author fredy_vazzqz
  * @version 1.0.0
  */
+
+@ApiTags('Products')
 @Controller('products')
 // @Auth() //* -> Protege todas las rutas del controlador con autenticación
 export class ProductsController {

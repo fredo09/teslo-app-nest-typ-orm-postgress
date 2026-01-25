@@ -8,13 +8,17 @@ import {
   Param,
   Res,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { diskStorage } from 'multer';
-import { FilesService } from './files.service';
-import { fileFilter, fileNamer } from './helpers';
 import { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
+
+import { FilesService } from './files.service';
+
+import { fileFilter, fileNamer } from './helpers';
+
 
 /**
  * Controlador para la gestión de archivos.
@@ -24,6 +28,7 @@ import { ConfigService } from '@nestjs/config';
  * @version 1.0.0
  */
 
+@ApiTags('Files')
 @Controller('files')
 export class FilesController {
   constructor(
