@@ -82,7 +82,7 @@ export class ProductsService {
     return findProducts.map(({ images, ...restProduct }) => ({
       ...restProduct,
       images: ( images || [] ).map( img => img.url)
-    }))
+    }));
   }
 
   /**
