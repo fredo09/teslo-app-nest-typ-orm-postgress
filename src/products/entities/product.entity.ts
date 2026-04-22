@@ -26,23 +26,37 @@ import { User } from "src/auth/entities/user.entity";
  // * nombre de la tabla en la bd
 @Entity({ name: 'products' })
 export class Product {
-	@ApiProperty()
+	@ApiProperty({
+		example: 'uuid',
+		description: 'Identificador único del producto',
+		uniqueItems: true
+	})
 	@PrimaryGeneratedColumn('uuid')
 	id: string;
 
-	@ApiProperty()
+	@ApiProperty({
+		example: 'T-Shirt Teslo',
+		description: 'El título del producto',
+		uniqueItems: true
+	})
 	@Column('text', {
 		unique: true,
 	})
 	title: string;
 
-	@ApiProperty()
+	@ApiProperty({
+		example: 0,
+		description: 'El precio del producto',
+	})
 	@Column('float', {
 		default: 0
 	})
 	price: number;
 
-	@ApiProperty()
+	@ApiProperty({
+		example: 'Una descripción del producto',
+		description: 'La descripción del producto',
+	})
 	@Column({
 		type: 'text',
 		nullable: true,
@@ -55,24 +69,36 @@ export class Product {
 	})
 	slug: string;
 
-	@ApiProperty()
+	@ApiProperty({
+		example: 10,
+		description: 'La cantidad de stock disponible del producto',
+	})
 	@Column('int', {
 		default: 0
 	})
 	stock: number;
 
-	@ApiProperty()
+	@ApiProperty({
+		example: ['S', 'M', 'L', 'XL'],
+		description: 'Las tallas disponibles del producto',
+	})
 	@Column('text', {
 		array: true
 	})
 	sizes: string[];
 
-	@ApiProperty()
+	@ApiProperty({
+		example: 'Gender',
+		description: 'El género al que está dirigido el producto',
+	})
 	@Column('text')
 	gender: string;
 
 	//TODO: TAGS Y IMAGES
-	@ApiProperty()
+	@ApiProperty({
+		example: ['#tag1', '#tag2', '#tag3'],
+		description: 'Los tags del producto',
+	})
 	@Column('text', {
 		array: true,
 		default: []
