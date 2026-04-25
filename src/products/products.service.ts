@@ -82,12 +82,12 @@ export class ProductsService {
     return findProducts.map(({ images, ...restProduct }) => ({
       ...restProduct,
       images: ( images || [] ).map( img => img.url)
-    }))
+    }));
   }
 
   /**
    * Busca un producto por su ID
-   * @param id identificador del producto a buscar
+   * @param term identificador del producto a buscar
    * @returns 
    */
   async findOne(term: string) {

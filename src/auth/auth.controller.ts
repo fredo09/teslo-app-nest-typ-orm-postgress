@@ -6,6 +6,7 @@ import {
   UseGuards
 //  SetMetadata
 } from '@nestjs/common';
+import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserRoleGuard } from './guards/user-role/user-role.guard';
@@ -24,6 +25,8 @@ import { RolesProtected } from './decorators';
  * @author Alfredo Vázquez
  * @version 1.0.0
  */
+
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -33,6 +36,10 @@ export class AuthController {
    * @param createUserDto datos para crear un nuevo usuario
    * @returns {CreateUserDto} el usuario creado
    */
+    @ApiResponse({ status: 201, description: 'Producto creado exitosamente.', type: User })
+    @ApiResponse({ status: 400, description: 'Datos de entrada inválidos.' })
+    @ApiResponse({ status: 401, description: 'No autorizado.' })
+    @ApiResponse({ status: 403, description: 'Acceso prohibido.' })
   @Post('register')
   createUser(@Body() createUserDto: CreateUserDto) {
     return this.authService.create(createUserDto);

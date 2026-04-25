@@ -19,6 +19,8 @@ import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Auth, GetUserDecorator } from 'src/auth/decorators';
 import { ValidRoles } from 'src/auth/interfaces';
 import { User } from 'src/auth/entities/user.entity';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Product } from './entities';
 
 /**
  * Controlador de productos
@@ -30,6 +32,8 @@ import { User } from 'src/auth/entities/user.entity';
  * @author fredy_vazzqz
  * @version 1.0.0
  */
+
+@ApiTags('Products')
 @Controller('products')
 // @Auth() //* -> Protege todas las rutas del controlador con autenticación
 export class ProductsController {
@@ -38,10 +42,14 @@ export class ProductsController {
   /**
    * Crea un nuevo producto
    * @param createProductDto datos para crear un nuevo producto
-   * @returns El producto creado
+   * @returns El producto creado¶
    */
   @Post()
   @Auth()
+  @ApiResponse({ status: 201, description: 'Producto creado exitosamente.', type: Product })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos.' })
+  @ApiResponse({ status: 401, description: 'No autorizado.' })
+  @ApiResponse({ status: 403, description: 'Acceso prohibido.' })
   create(
     @Body() createProductDto: CreateProductDto,
     @GetUserDecorator() user: User

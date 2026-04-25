@@ -8,6 +8,7 @@ import {
 	OneToMany,
 	PrimaryGeneratedColumn
 } from "typeorm";
+import { ApiProperty } from "@nestjs/swagger";
 
 import { ProductImage } from "./product-image.entity";
 import { User } from "src/auth/entities/user.entity";
@@ -25,44 +26,79 @@ import { User } from "src/auth/entities/user.entity";
  // * nombre de la tabla en la bd
 @Entity({ name: 'products' })
 export class Product {
+	@ApiProperty({
+		example: 'uuid',
+		description: 'Identificador único del producto',
+		uniqueItems: true
+	})
 	@PrimaryGeneratedColumn('uuid')
 	id: string;
 
+	@ApiProperty({
+		example: 'T-Shirt Teslo',
+		description: 'El título del producto',
+		uniqueItems: true
+	})
 	@Column('text', {
 		unique: true,
 	})
 	title: string;
 
+	@ApiProperty({
+		example: 0,
+		description: 'El precio del producto',
+	})
 	@Column('float', {
 		default: 0
 	})
 	price: number;
 
+	@ApiProperty({
+		example: 'Una descripción del producto',
+		description: 'La descripción del producto',
+	})
 	@Column({
 		type: 'text',
 		nullable: true,
 	})
 	description: string;
 
+	@ApiProperty()
 	@Column('text', {
 		unique: true,
 	})
 	slug: string;
 
+	@ApiProperty({
+		example: 10,
+		description: 'La cantidad de stock disponible del producto',
+	})
 	@Column('int', {
 		default: 0
 	})
 	stock: number;
 
+	@ApiProperty({
+		example: ['S', 'M', 'L', 'XL'],
+		description: 'Las tallas disponibles del producto',
+	})
 	@Column('text', {
 		array: true
 	})
 	sizes: string[];
 
+	@ApiProperty({
+		example: 'Gender',
+		description: 'El género al que está dirigido el producto',
+	})
 	@Column('text')
 	gender: string;
 
 	//TODO: TAGS Y IMAGES
+	@ApiProperty({
+		example: ['#tag1', '#tag2', '#tag3'],
+		description: 'Los tags del producto',
+	})
 	@Column('text', {
 		array: true,
 		default: []
@@ -70,6 +106,7 @@ export class Product {
 	tags: string[];
 
 	//! relacion de images con product
+	@ApiProperty()
 	@OneToMany(
 		() => ProductImage,
 		(productImage) => productImage.product,

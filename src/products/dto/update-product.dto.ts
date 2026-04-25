@@ -1,4 +1,5 @@
-import { PartialType } from '@nestjs/mapped-types';
+// import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger'; // se cambio a swagger para que se refleje en la documentacion de swagger
 import { CreateProductDto } from './create-product.dto';
 
 /**
