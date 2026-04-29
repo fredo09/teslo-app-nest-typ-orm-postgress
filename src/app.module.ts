@@ -9,6 +9,7 @@ import { FilesModule } from './files/files.module';
 import { CommonModule } from './common/common.module';
 import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
+import { MessageWsModule } from './message-ws/message-ws.module';
 
 /**
  * Módulo principal de la aplicación
@@ -38,6 +39,7 @@ import { AuthModule } from './auth/auth.module';
     SeedModule,
     FilesModule,
     AuthModule,
+    MessageWsModule,
   ]
 })
 export class AppModule {}
