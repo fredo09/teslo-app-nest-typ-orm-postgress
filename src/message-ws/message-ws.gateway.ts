@@ -1,6 +1,11 @@
 import { Server, Socket } from 'socket.io';
 import { MessageWsService } from './message-ws.service';
-import { OnGatewayConnection, OnGatewayDisconnect , WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  WebSocketGateway,
+  WebSocketServer
+} from '@nestjs/websockets';
 
 /**
  * Message WebSocket Gateway
@@ -37,11 +42,8 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
    * Handles the disconnection of a client
    * @param client {Socket}
    */
-  handleDisconnect(client: Socket) {
-    this.messageWsService.removeClient(client.id);
-    console.log("🚀 ~ Clientes conectados : ", {
-      CountClients: this.handleClientsConnected() 
-    });
+  handleDisconnect({ id }: Socket) {
+    this.messageWsService.removeClient(id);
   }
 
   /**
