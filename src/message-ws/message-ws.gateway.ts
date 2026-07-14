@@ -48,7 +48,7 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
     }
     
     console.log("🚀 ~ Clientes conectados : ", {
-      CountClients: this.handleClientsConnected() 
+      CountClients: this.handleClientsConnected()
     });
     
     this.wss.emit('clients-updated', this.handleClientsConnected());

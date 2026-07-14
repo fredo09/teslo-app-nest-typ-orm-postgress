@@ -16,7 +16,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 interface ConnectedClients {
 	[id: string]: {
 		socket: Socket,
-		user: User
+		user: User,
 	};
 }
 
@@ -38,6 +38,8 @@ export class MessageWsService {
 
 		if (!user) throw new Error('User not found');
 		if (!user.isActive) throw new Error('User is not active');
+
+		this.checkUserConnection(user);
 		
 		this.connectedClients[client.id] = {
 			socket: client,
@@ -68,5 +70,20 @@ export class MessageWsService {
 	 */
 	getUserFullName(clientId: string): string {
 		return this.connectedClients[clientId]?.user.fullName || 'Unknown';
+	}
+
+	/**
+	 * Checks if a user is already connected and disconnects the previous connection if so.
+	 * This is to ensure that a user can only be connected from one client at a time.
+	 * @param user {User} - Entity User
+	 */
+	private checkUserConnection(user: User) {
+		for (const clientId of Object.keys(this.connectedClients)) {
+			const connectedClient = this.connectedClients[clientId];
+			if (connectedClient.user.id === user.id) {
+				connectedClient.socket.disconnect();
+				this.removeClient(clientId);
+			}
+		}
 	}
 }
