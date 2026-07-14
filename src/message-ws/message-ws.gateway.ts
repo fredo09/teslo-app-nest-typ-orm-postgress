@@ -35,21 +35,22 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
    * Handles the connection of a client
    * @param client {Socket}
    */
-  handleConnection(client: Socket) {
-    const tokenJwt = client.handshake.headers.authentication as string;
+  async handleConnection(client: Socket) {
     let payload: JwtPayloadI;
+    const tokenJwt = client.handshake.headers.authentication as string;
     try {
       payload = this.jwtService.verify(tokenJwt);
+      await this.messageWsService.registerClient(client, payload.id);
     }catch (error) {
       //! si el token no es valido, desconectamos al cliente
       client.disconnect();
       return;
     }
-  
-    this.messageWsService.registerClient(client, payload.id);
+    
     console.log("🚀 ~ Clientes conectados : ", {
       CountClients: this.handleClientsConnected() 
     });
+    
     this.wss.emit('clients-updated', this.handleClientsConnected());
   }
 
@@ -69,6 +70,14 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
     return this.messageWsService.getConnectedClients();
   }
 
+  /**
+   * This is a message handler that listens for the 'message-from-client' event.
+   * When this event is received, it emits a 'message-from-server' event to all connected clients.
+   * The emitted message includes the full name of the user who sent the message and the message itself.
+   * 
+   * @param client {Socket} - The client that sent the message.
+   * @param payload {NewMessageDto} - The message data sent by the client.
+   */
   @SubscribeMessage('message-from-client')
   async handleOnMessageFromClient( client: Socket, payload: NewMessageDto ) {
     //!Emitir al cliente conectado
@@ -85,7 +94,7 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
 
     //!Emitir a todos los clientes conectados
     this.wss.emit('message-from-server', {
-      fullName: 'Soy yo',
+      fullName: this.messageWsService.getUserFullName(client.id),
       message: payload.message || 'es un mensaje vacio'
     });
   }
