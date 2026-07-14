@@ -22,7 +22,7 @@ export class MessageWsService {
 	 * Registers a client as connected
 	 * @param client {Socket}
 	 */
-	registerClient(client: Socket) {
+	registerClient(client: Socket, userId: string) {
 		this.connectedClients[client.id] = client;
 	}
 

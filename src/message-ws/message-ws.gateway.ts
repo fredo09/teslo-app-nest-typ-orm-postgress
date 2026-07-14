@@ -1,11 +1,15 @@
-import { Server, Socket } from 'socket.io';
-import { MessageWsService } from './message-ws.service';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { MessageWsService } from './message-ws.service';
+import { NewMessageDto } from './dtos';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayloadI } from 'src/auth/interfaces';
 
 /**
  * Message WebSocket Gateway
@@ -23,7 +27,8 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
   @WebSocketServer() wss!: Server;
   
   constructor(
-    private readonly messageWsService: MessageWsService
+    private readonly messageWsService: MessageWsService,
+    private readonly jwtService: JwtService
   ) {}
 
   /**
@@ -31,7 +36,17 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
    * @param client {Socket}
    */
   handleConnection(client: Socket) {
-    this.messageWsService.registerClient(client);
+    const tokenJwt = client.handshake.headers.authentication as string;
+    let payload: JwtPayloadI;
+    try {
+      payload = this.jwtService.verify(tokenJwt);
+    }catch (error) {
+      //! si el token no es valido, desconectamos al cliente
+      client.disconnect();
+      return;
+    }
+  
+    this.messageWsService.registerClient(client, payload.id);
     console.log("🚀 ~ Clientes conectados : ", {
       CountClients: this.handleClientsConnected() 
     });
@@ -52,5 +67,26 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
    */
   handleClientsConnected() {
     return this.messageWsService.getConnectedClients();
+  }
+
+  @SubscribeMessage('message-from-client')
+  async handleOnMessageFromClient( client: Socket, payload: NewMessageDto ) {
+    //!Emitir al cliente conectado
+    // client.emit('message-from-server', {
+    //   fullName: 'Soy yo',
+    //   message: payload.message || 'no-message'
+    // });
+
+    //!Emitir a todos los clientes conectados menos al conectado
+    // client.broadcast.emit('message-from-server', {
+    //   fullName: 'Soy yo',
+    //   message: payload.message || 'no-message'
+    // });
+
+    //!Emitir a todos los clientes conectados
+    this.wss.emit('message-from-server', {
+      fullName: 'Soy yo',
+      message: payload.message || 'es un mensaje vacio'
+    });
   }
 }
