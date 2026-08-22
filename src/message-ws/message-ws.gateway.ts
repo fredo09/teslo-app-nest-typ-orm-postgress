@@ -39,14 +39,13 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
     let payload: JwtPayloadI;
     const tokenJwt = client.handshake.headers.authentication as string;
     try {
-      payload = this.jwtService.verify(tokenJwt);
-      await this.messageWsService.registerClient(client, payload.id);
+      const { id } = this.jwtService.verify(tokenJwt);
+      await this.messageWsService.registerClient(client, id);
     }catch (error) {
       //! si el token no es valido, desconectamos al cliente
       client.disconnect();
       return;
     }
-    
     console.log("🚀 ~ Clientes conectados : ", {
       CountClients: this.handleClientsConnected()
     });
